@@ -1,30 +1,45 @@
 #include "connection.h"
 
-Connection::Connection(int sock, struct sockaddr_in *conn) {
+Connection::Connection(int sock)
+{
     socket = sock;
-    connection = conn;
+    timeout.tv_sec = 0;
+    timeout.tv_usec = 0;
 }
 
-Connection::Connection(int sock, struct sockaddr_in *conn, int second, int microsecond) {
+Connection::Connection(int sock, int second, int microsecond)
+{
     socket = sock;
-    connection = conn;
     timeout.tv_sec = second;
     timeout.tv_usec = microsecond;
 }
 
-void Connection::setTimeout(int second, int microsecond) {
+void Connection::setTimeout(int second, int microsecond)
+{
     timeout.tv_sec = second;
     timeout.tv_usec = microsecond;
 }
 
-int Connection::recvfrom(char *buf, int *length)
+ssize_t Connection::receives(struct sockaddr_in *connection, char *buf, int *length)
 {
     fd_set socks;
     FD_ZERO(&socks);
-    FD_SET(sock, &socks);
-    return (select(socket + 1, &socks, NULL, NULL, &timeout) && recvfrom(socket, buf, *length, 0, (struct sockaddr *)connection, length);
+    FD_SET(socket, &socks);
+
+    int fromlen;
+
+    int checkTimeout = select(socket + 1, &socks, NULL, NULL, &timeout);
+    return (checkTimeout == 0 || checkTimeout == 1) ? recvfrom(socket, buf, *length, 0, (struct sockaddr *)connection, (socklen_t *)&fromlen) : 0;
 }
 
-int Connection::sendto() {
-    
+ssize_t Connection::sends(struct sockaddr_in *connection, const char *buf, int *length)
+{
+    fd_set socks;
+    FD_ZERO(&socks);
+    FD_SET(socket, &socks);
+
+    int fromlen;
+
+    int checkTimeout = select(socket + 1, &socks, NULL, NULL, &timeout);
+    return (checkTimeout == 0 || checkTimeout == 1) ? sendto(socket, buf, *length, 0, (struct sockaddr *)connection, (socklen_t)fromlen) : 0;
 }

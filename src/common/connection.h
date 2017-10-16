@@ -3,7 +3,6 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/select.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -11,18 +10,17 @@
 
 class Connection {
 public:
-	Connection(int, struct sockaddr_in *);
-	Connection(int, struct sockaddr_in *, int = 0, int = 0);
+	Connection(int);
+	Connection(int, int, int);
 
 	void setTimeout(int, int);
 
-	int recvfrom(char *, int *);
+	ssize_t receives(struct sockaddr_in *, char *, int *);
 
-	int sendto();
+	ssize_t sends(struct sockaddr_in *, const char *, int *);
 
 private:
 	int socket;
-	struct sockaddr_in *connection;
 	struct timeval timeout;
 };
 
