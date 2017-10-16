@@ -1,4 +1,6 @@
 #include <iostream>
+#include "common/connection.h"
+
 using namespace std;
 
 int main() {
