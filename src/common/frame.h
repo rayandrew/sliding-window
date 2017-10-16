@@ -7,24 +7,34 @@ public:
 	Frame(unsigned char *frame);
 
 	bool isValid();
+	unsigned char* bytes();
+	unsigned char getData();
+	unsigned int getSeq();
+
+	static const unsigned int SIZE = 9;
 
 private:
-	const unsigned char SOH = 0x1;
-	const unsigned char STX = 0x2;
-	const unsigned char ETX = 0x3;
-	unsigned char frame[9];
+	static const unsigned char SOH = 0x1;
+	static const unsigned char STX = 0x2;
+	static const unsigned char ETX = 0x3;
+	unsigned char frame[SIZE];
 };
 
 class AckFrame {
 public:
-	AckFrame::AckFrame(unsigned char adv, unsigned int nextSeq);
+	AckFrame(unsigned char adv, unsigned int nextSeq);
 	AckFrame(unsigned char *frame);
 
 	bool isValid();
+	unsigned char* bytes();
+	unsigned char getAdv();
+	unsigned int getNextSeq();
+
+	static const unsigned int SIZE = 7;
 
 private:
-	const unsigned char ACK = 0x6;
-	unsigned char frame[7];
+	static const unsigned char ACK = 0x6;
+	unsigned char frame[SIZE];
 };
 
 #endif
