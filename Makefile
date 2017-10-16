@@ -1,19 +1,34 @@
 CC=g++
-LATEX=pdflatex
+CFLAGS=-c -Wall -g
+LDFLAGS=-g -lm
 
-.PHONY: all clean bin doc
+SENDER_MAIN=./src/sendfile.cpp
+RECEIVER_MAIN=./src/recvfile.cpp
 
-all: bin doc
+SOURCES=$(wildcard ./src/*.cpp)
+OBJECTS=$(SOURCES:.cpp=.o)
+SENDER_OBJECTS=$(filter-out $(RECEIVER_MAIN:.cpp=.o), $(OBJECTS))
+RECEIVER_OBJECTS=$(filter-out $(SENDER_MAIN:.cpp=.o), $(OBJECTS))
 
-bin:
-	$(CC) src/main.cpp -o bin/sliding-window
+SENDER_EXECUTABLE=./sendfile
+RECEIVER_EXECUTABLE=./recvfile
 
-doc:
-	-$(LATEX) doc/report.tex -output-directory doc
+.PHONY: all bin clean
+
+all: bin
+
+bin: $(SENDER_EXECUTABLE) $(RECEIVER_EXECUTABLE)
+
+$(SENDER_EXECUTABLE): $(SENDER_OBJECTS)
+	$(CC) $(LDFLAGS) $(SENDER_OBJECTS) -o $@
+
+$(RECEIVER_EXECUTABLE): $(RECEIVER_OBJECTS)
+	$(CC) $(LDFLAGS) $(RECEIVER_OBJECTS) -o $@
+
+%.o: %.cpp
+	$(CC) $(CFLAGS) $< -o $@
 
 clean:
-	-rm bin/sliding-window
-	-rm bin/sliding-window.exe
-	-rm doc/report.aux
-	-rm doc/report.log
-	-rm doc/report.pdf
+	-rm $(OBJECTS)
+	-rm $(SENDER_EXECUTABLE)
+	-rm $(RECEIVER_EXECUTABLE)
