@@ -1,3 +1,6 @@
+#ifndef CHECKSUM_H
+#define CHECKSUM_H
+
 unsigned char calc_crc8(const unsigned char *data, int len) 
 {
 	unsigned int sum = 0;
@@ -11,3 +14,4 @@ unsigned char calc_crc8(const unsigned char *data, int len)
 	return (~c + 1);
 }
 
+#endif

@@ -1,3 +1,6 @@
+#ifndef FILE_H
+#define FILE_H
+
 #include <fstream>
 
 std::ifstream::pos_type filesize(const char* filename)
@@ -19,3 +22,5 @@ unsigned char* readFile(const char* filename, int nbyte)
 	return (unsigned char*)fileContent;
 	//Can cause memory leak
 }
+
+#endif
