@@ -29,7 +29,7 @@ ssize_t Connection::receives(struct sockaddr_in *connection, char *buf, int *len
     int fromlen;
 
     int checkTimeout = select(socket + 1, &socks, NULL, NULL, &timeout);
-    return (checkTimeout == 0 || checkTimeout == 1) ? recvfrom(socket, buf, *length, 0, (struct sockaddr *)connection, (socklen_t *)&fromlen) : 0;
+    return (checkTimeout == 0 || checkTimeout == -1) ? 0 : recvfrom(socket, buf, *length, 0, (struct sockaddr *)connection, (socklen_t *)&fromlen);
 }
 
 ssize_t Connection::sends(struct sockaddr_in *connection, const char *buf, int *length)
@@ -41,5 +41,5 @@ ssize_t Connection::sends(struct sockaddr_in *connection, const char *buf, int *
     int fromlen;
 
     int checkTimeout = select(socket + 1, &socks, NULL, NULL, &timeout);
-    return (checkTimeout == 0 || checkTimeout == 1) ? sendto(socket, buf, *length, 0, (struct sockaddr *)connection, (socklen_t)fromlen) : 0;
+    return (checkTimeout == 0 || checkTimeout == -1) ? 0 : sendto(socket, buf, *length, 0, (struct sockaddr *)connection, (socklen_t)fromlen);
 }
