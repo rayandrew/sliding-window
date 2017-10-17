@@ -13,9 +13,6 @@ int main() {
 		return 1;
 	}
 
-	conn.setSendWindowSize(8);
-	conn.setAdvertisedWindowSize(8);
-
 	conn.send_data(data, 600);
 	cout << "Finished sending data." << endl;
 

@@ -36,7 +36,7 @@ int SendConnection::send_data(unsigned char *message, unsigned int messageSize) 
 		messageBytesProcessed += bytesToRefill;
 
 		/* Send bytes as allowed by the advertised window size */
-		log_debug("Sending from seq: " + toStr(newSeq));
+		log_debug("Last seq in buffer: " + toStr(newSeq-1));
 		unsigned int bytesToSend = std::min(advBytes, newSeq - nextSentSeq);
 		currentTimestamp = timer();
 		for (unsigned int i = 0; i < bytesToSend; i++) {
@@ -97,7 +97,9 @@ int SendConnection::send_data(unsigned char *message, unsigned int messageSize) 
 			nextBufferItemToCheck++;
 		}
 
-		// TODO: handle adv == 0 case
+		/* Handle advertised window size == 0 case */
+		log_info("Advertised window size is 0 - set to 1 to allow periodical probes");
+		if (advBytes == 0) advBytes = 1;
 	}
 
 	return messageBytesAcked;
