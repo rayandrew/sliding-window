@@ -9,7 +9,7 @@ Connection::Connection(const char *host, const char *port) {
 
     int rv;
     if ((rv = getaddrinfo(host, port, &this->hints, &this->servinfo)) != 0) {
-        //fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
+        log_error("Connection error: getaddrinfo: " + toStr(gai_strerror(rv)));
         this->valid = false;
     }
 
@@ -24,8 +24,10 @@ Connection::Connection(const char *host, const char *port) {
     }
     if (this->p == NULL) {
         this->valid = false;
-        //fprintf(stderr, "talker: failed to create socket\n");
+        log_error("Connection error: failed to create socket");
     }
+
+    this->valid = true;
 }
 
 Connection::~Connection() {
@@ -50,7 +52,7 @@ int Connection::rx(unsigned char *data, unsigned int len) {
         // timeout
         return -2;
     } else if (checkTimeout == -1) {
-        // error
+        log_error("Connection error: select failed");
         return -1;
     } else {
         return recv(this->sockfd, data, len, 0);
@@ -60,7 +62,7 @@ int Connection::rx(unsigned char *data, unsigned int len) {
 int Connection::tx(const unsigned char *data, unsigned int len) {
     int numbytes;
     if ((numbytes = sendto(this->sockfd, data, len, 0, this->p->ai_addr, this->p->ai_addrlen)) == -1) {
-        //perror("talker: sendto");
+        log_error("Connection error: sendto failed");
     }
     return numbytes;
 }

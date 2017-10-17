@@ -8,7 +8,7 @@ Frame::Frame(unsigned char data, unsigned int seq) {
 	this->frame[5] = STX;
 	this->frame[6] = data;
 	this->frame[7] = ETX;
-	//this->frame[8] = checksum(this->frame, SIZE-1);
+	this->frame[8] = checksum(this->frame, SIZE-1);
 }
 
 Frame::Frame(unsigned char *frame) {
@@ -16,8 +16,10 @@ Frame::Frame(unsigned char *frame) {
 }
 
 bool Frame::isValid() {
-	return true; // TODO
-	//return checksum(this->frame, 8) == this->frame[8];
+	return this->frame[0] == SOH
+		&& checksum(this->frame, 8) == this->frame[8]
+		&& this->frame[5] == STX
+		&& this->frame[7] == ETX;
 }
 
 unsigned char* Frame::bytes() {
@@ -38,7 +40,7 @@ AckFrame::AckFrame(unsigned char adv, unsigned int nextSeq) {
 	this->frame[0] = ACK;
 	memcpy(this->frame+1, &nextSeq, sizeof(nextSeq));
 	this->frame[5] = adv;
-	//this->frame[6] = checksum(this->frame, SIZE-1);
+	this->frame[6] = checksum(this->frame, SIZE-1);
 }
 
 AckFrame::AckFrame(unsigned char *frame) {
@@ -46,8 +48,8 @@ AckFrame::AckFrame(unsigned char *frame) {
 }
 
 bool AckFrame::isValid() {
-	return true; // TODO
-	//return checksum(this->frame, SIZE-1) == this->frame[SIZE-1];
+	return this->frame[0] == ACK
+		&& checksum(this->frame, SIZE-1) == this->frame[SIZE-1];
 }
 
 unsigned char* AckFrame::bytes() {

@@ -4,11 +4,15 @@ using namespace std;
 
 int main() {
 	
-	cout << "SENDER" << endl;
+	cout << ".: SENDER :." << endl;
 
 	unsigned char data[] = "abcd";
 
 	Connection conn("127.0.0.1", "12345");
+	if (!conn.isValid()) {
+		return 1;
+	}
+
 	send_data(conn, data, 4);
 
 	return 0;

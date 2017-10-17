@@ -22,7 +22,7 @@ unsigned int newSeq = 0;
 std::deque<SendBufferItem> buffer;
 std::deque<SendBufferItem>::iterator nextBufferItemToSend = buffer.begin();
 
-void init_tx() { // TODO
+void init_tx() { // TODO: config tx using this function
 	sendWindowSize = 256;
 	advBytes = 256;
 }
@@ -103,7 +103,9 @@ int send_data(Connection &conn, unsigned char *message, unsigned int messageSize
 			}
 			nextBufferItemToCheck++;
 		}
+
+		// TODO: handle adv == 0 case
 	}
 
-	return 0;
+	return messageBytesAcked;
 }
