@@ -42,7 +42,8 @@ int main(int argc, char* argv[]) {
 		/* Create a new connection, listening on all addresses */
 		RecvConnection conn(NULL, port);
 		if (!conn.isValid()) exit(1);
-		conn.setReceiveWindowSize(windowSize);
+		//conn.setReceiveWindowSize(windowSize);
+		conn.setReceiveTimeout(200000);
 
 		/* Receive packets and write to file */
 		fileBuffer = new unsigned char[bufferSize];

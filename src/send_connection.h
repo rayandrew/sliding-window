@@ -33,6 +33,7 @@ private:
 		unsigned int seq;
 		unsigned char data;
 		unsigned long timestamp;
+		unsigned int ackCount;
 	} SendBufferItem;
 
 	Socket sock;

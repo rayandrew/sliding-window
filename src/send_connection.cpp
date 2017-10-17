@@ -60,6 +60,7 @@ int SendConnection::send_data(unsigned char *message, unsigned int messageSize) 
 			SendBufferItem sbi;
 			sbi.seq = newSeq;
 			sbi.data = message[messageBytesProcessed + i];
+			sbi.ackCount = 0;
 			buffer.push_back(sbi);
 			newSeq++;
 		}
@@ -93,6 +94,9 @@ int SendConnection::send_data(unsigned char *message, unsigned int messageSize) 
 				if ((ackPacket.getNextSeq() - nextAckSeq) <= (nextSentSeq - nextAckSeq)) {
 					log_info("Received ACK (nextSeq: " + toStr(ackPacket.getNextSeq()) + ", adv: " + toStr((unsigned int) ackPacket.getAdv()) + ")");
 					nextAckSeq = ackPacket.getNextSeq();
+					if (buffer.front().seq == nextAckSeq) { // Duplicate ACK
+						buffer.front().ackCount++;
+					}
 					while (!buffer.empty() && buffer.front().seq != nextAckSeq) {
 						buffer.pop_front();
 						nextBufferItemToSendIndex--;
@@ -116,13 +120,13 @@ int SendConnection::send_data(unsigned char *message, unsigned int messageSize) 
 		unsigned int packetsAwaitingAck = nextSentSeq - nextAckSeq;
 		log_debug("Updating timeout... (timestamp: " + toStr(currentTimestamp) + ")");
 		for (unsigned int i = 0; i < packetsAwaitingAck; i++) {
-			if (currentTimestamp - nextBufferItemToCheck->timestamp >= ackTimeout*MICROSECONDS_IN_A_NANOSECOND) {
+			if (currentTimestamp - nextBufferItemToCheck->timestamp >= ackTimeout*MICROSECONDS_IN_A_NANOSECOND || nextBufferItemToCheck->ackCount > 1) {
 				Packet packet(nextBufferItemToCheck->data, nextBufferItemToCheck->seq);
 				if (sock.socketSend(packet.bytes(), Packet::SIZE) <= 0) {
 					log_error("Failed to resend packet (seq: " + toStr(nextBufferItemToCheck->seq) + ")");
 				}
 				nextBufferItemToCheck->timestamp = timer();
-				log_info("ACK timeout, packet resent (seq: " + toStr(nextBufferItemToCheck->seq) + ")");
+				log_info("ACK timeout or duplicate ACK, packet resent (seq: " + toStr(nextBufferItemToCheck->seq) + ")");
 			}
 			nextBufferItemToCheck++;
 		}
