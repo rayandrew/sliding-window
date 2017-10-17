@@ -22,7 +22,7 @@ private:
 
 class AckFrame {
 public:
-	AckFrame(unsigned char adv, unsigned int nextSeq);
+	AckFrame(unsigned int nextSeq, unsigned char adv);
 	AckFrame(unsigned char *frame);
 
 	bool isValid();

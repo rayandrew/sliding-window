@@ -36,7 +36,7 @@ unsigned int Frame::getSeq() {
 	return seq;
 }
 
-AckFrame::AckFrame(unsigned char adv, unsigned int nextSeq) {
+AckFrame::AckFrame(unsigned int nextSeq, unsigned char adv) {
 	this->frame[0] = ACK;
 	memcpy(this->frame+1, &nextSeq, sizeof(nextSeq));
 	this->frame[5] = adv;

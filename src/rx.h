@@ -3,6 +3,6 @@
 
 #include "common/connection.h"
 
-int recv_data(Connection &conn, unsigned char *msg, unsigned int size);
+int recv_data(Connection &conn, unsigned char *message, unsigned int messageSize);
 
 #endif
