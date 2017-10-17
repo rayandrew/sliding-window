@@ -9,9 +9,9 @@ Socket::Socket(const char *host, const char *port, bool listen) {
     this->hints.ai_socktype = SOCK_DGRAM;
     if (host == NULL) this->hints.ai_flags = AI_PASSIVE;
 
-    /* Uncomment to enable socket address reuse */
-    //int reuseAddressValue = 1;
-    //setsockopt(this->sockfd, SOL_SOCKET, SO_REUSEADDR, &reuseAddressValue, sizeof reuseAddressValue);
+    /* Enable socket address reuse */
+    int reuseAddressValue = 1;
+    setsockopt(this->sockfd, SOL_SOCKET, SO_REUSEADDR, &reuseAddressValue, sizeof reuseAddressValue);
 
     int rv;
     if ((rv = getaddrinfo(host, port, &this->hints, &this->servinfo)) != 0) {
@@ -67,17 +67,40 @@ int Socket::socketRecv(unsigned char *data, unsigned int len) {
         // timeout
         return -2;
     } else if (checkTimeout == -1) {
-        log_error("Socket error: select failed");
+        log_error("Socket error: socketRecv: select failed");
         return -1;
     } else {
         return recv(this->sockfd, data, len, 0);
     }
 }
 
+int Socket::socketRecvFrom(unsigned char *data, unsigned int len, struct sockaddr *srcAddress, socklen_t *srcAddressLength) {
+    fd_set fds;
+    FD_ZERO(&fds);
+    FD_SET(this->sockfd, &fds);
+
+    struct timeval timeout = this->recvTimeout;
+    int checkTimeout = select(this->sockfd + 1, &fds, NULL, NULL, &timeout);
+    if (checkTimeout == 0) {
+        // timeout
+        return -2;
+    } else if (checkTimeout == -1) {
+        log_error("Socket error: socketRecvFrom: select failed");
+        return -1;
+    } else {
+        return recvfrom(this->sockfd, data, len, 0, srcAddress, srcAddressLength);
+    }
+}
+
+/* Will send to this socket's specified host and port */
 int Socket::socketSend(const unsigned char *data, unsigned int len) {
-    int numbytes;
-    if ((numbytes = sendto(this->sockfd, data, len, 0, this->p->ai_addr, this->p->ai_addrlen)) == -1) {
-        log_error("Socket error: sendto failed");
+    return socketSendTo(data, len, this->p->ai_addr, this->p->ai_addrlen);
+}
+
+int Socket::socketSendTo(const unsigned char *data, unsigned int len, const struct sockaddr *dest, socklen_t destAddressLength) {
+    int numbytes = sendto(this->sockfd, data, len, 0, dest, destAddressLength);
+    if (numbytes == -1) {
+        log_error("Socket error: socketReply: sendto failed");
     }
     return numbytes;
 }

@@ -20,7 +20,7 @@ int RecvConnection::recv_data(unsigned char *message, unsigned int messageSize) 
 		/* Listen for packets */
 		log_debug("Listening for packets...");
 		unsigned char packetBytes[Packet::SIZE];
-		int recvSize = sock.socketRecv(packetBytes, Packet::SIZE);
+		int recvSize = sock.socketRecvFrom(packetBytes, Packet::SIZE, (struct sockaddr *) &lastReceivedAddress, &lastReceivedAddressLength);
 		if (recvSize > 0) {
 			Packet packet(packetBytes);
 			if (packet.isValid()) {
@@ -42,10 +42,12 @@ int RecvConnection::recv_data(unsigned char *message, unsigned int messageSize) 
 					}
 
 					/* Reply with ACK */
-					AckPacket ackPacket(nextValidatedSeq, receiveWindowSize - (nextRecvSeq - nextValidatedSeq));
-					if (sock.socketSend(ackPacket.bytes(), AckPacket::SIZE) <= 0) {
+					unsigned char adv = std::min((unsigned int) 255, receiveWindowSize - (nextRecvSeq - nextValidatedSeq));
+					AckPacket ackPacket(nextValidatedSeq, adv);
+					if (sock.socketSendTo(ackPacket.bytes(), AckPacket::SIZE, (struct sockaddr *) &lastReceivedAddress, lastReceivedAddressLength) <= 0) {
 						log_error("Failed to send ACK (nextSeq: " + toStr(ackPacket.getNextSeq()) + ")");
 					}
+					log_info("Sent ACK (nextSeq: " + toStr(ackPacket.getNextSeq()) + ", adv: " + toStr((unsigned int) ackPacket.getAdv()) + ")");
 
 				} else {
 					log_info("Rejected packet outside window (seq: " + toStr(packet.getSeq()) + ")");

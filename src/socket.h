@@ -16,7 +16,9 @@ public:
 	void setRecvTimeout(unsigned long ns);
 
 	int socketRecv(unsigned char *data, unsigned int len);
+	int socketRecvFrom(unsigned char *data, unsigned int len, struct sockaddr *srcAddress, socklen_t *srcAddressLength);
 	int socketSend(const unsigned char *data, unsigned int len);
+	int socketSendTo(const unsigned char *data, unsigned int len, const struct sockaddr *dest, socklen_t destAddressLength);
 
 	bool isValid();
 

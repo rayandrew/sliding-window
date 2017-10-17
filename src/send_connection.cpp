@@ -58,12 +58,12 @@ int SendConnection::send_data(unsigned char *message, unsigned int messageSize) 
 				unsigned int receivedNextAckSeq = ackPacket.getNextSeq();
 				if ((receivedNextAckSeq - nextAckSeq) < (nextSentSeq - nextAckSeq)) {
 					nextAckSeq = receivedNextAckSeq;
-					log_info("Received ACK (nextSeq: " + toStr(nextAckSeq) + ", adv: " + toStr(ackPacket.getAdv()) + ")");
+					log_info("Received ACK (nextSeq: " + toStr(nextAckSeq) + ", adv: " + toStr((unsigned int) ackPacket.getAdv()) + ")");
 					while (!buffer.empty() && buffer.front().seq != nextAckSeq) {
 						buffer.pop_front();
 						messageBytesAcked++;
 					}
-					advBytes = ackPacket.getAdv();
+					advBytes = (unsigned int) ackPacket.getAdv();
 				} else {
 					log_info("Rejected ACK outside window (nextSeq: " + toStr(receivedNextAckSeq) + ")");
 				}

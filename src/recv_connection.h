@@ -31,6 +31,9 @@ private:
 	unsigned int nextValidatedSeq;
 	unsigned int nextRecvSeq;
 
+	struct sockaddr_in lastReceivedAddress;
+	socklen_t lastReceivedAddressLength;
+
 	std::map<unsigned int, unsigned char> buffer;
 };
 
