@@ -42,7 +42,7 @@ int SendConnection::send_data(unsigned char *message, unsigned int messageSize) 
 		for (unsigned int i = 0; i < bytesToSend; i++) {
 			SendBufferItem *nextBufferItemToSend = &buffer[nextBufferItemToSendIndex];
 			unsigned char packetData = nextBufferItemToSend->data;
-			unsigned char packetSeq = nextBufferItemToSend->seq;
+			unsigned int packetSeq = nextBufferItemToSend->seq;
 			Packet packet(packetData, packetSeq);
 			if (sock.socketSend(packet.bytes(), Packet::SIZE) <= 0) {
 				log_error("Failed to send packet (seq: " + toStr(nextBufferItemToSend->seq) + ")");
