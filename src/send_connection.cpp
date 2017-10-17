@@ -55,17 +55,17 @@ int SendConnection::send_data(unsigned char *message, unsigned int messageSize) 
 		if (recvSize > 0) {
 			AckPacket ackPacket(ackMessage);
 			if (ackPacket.isValid()) {
-				unsigned int receivedNextAckSeq = ackPacket.getNextSeq();
-				if ((receivedNextAckSeq - nextAckSeq) < (nextSentSeq - nextAckSeq)) {
-					nextAckSeq = receivedNextAckSeq;
-					log_info("Received ACK (nextSeq: " + toStr(nextAckSeq) + ", adv: " + toStr((unsigned int) ackPacket.getAdv()) + ")");
+				if ((ackPacket.getNextSeq() - nextAckSeq) <= (nextSentSeq - nextAckSeq)) {
+					log_info("Received ACK (nextSeq: " + toStr(ackPacket.getNextSeq()) + ", adv: " + toStr((unsigned int) ackPacket.getAdv()) + ")");
+					nextAckSeq = ackPacket.getNextSeq();
 					while (!buffer.empty() && buffer.front().seq != nextAckSeq) {
 						buffer.pop_front();
 						messageBytesAcked++;
 					}
 					advBytes = (unsigned int) ackPacket.getAdv();
 				} else {
-					log_info("Rejected ACK outside window (nextSeq: " + toStr(receivedNextAckSeq) + ")");
+					log_info("Rejected ACK outside window (nextSeq: " + toStr(ackPacket.getNextSeq()) + ")");
+					log_debug("(nextSentSeq: " + toStr(nextSentSeq) + ", nextAckSeq: " + toStr(nextAckSeq) + ")");
 				}
 			} else {
 				log_info("Rejected ACK with invalid checksum");
@@ -79,7 +79,6 @@ int SendConnection::send_data(unsigned char *message, unsigned int messageSize) 
 		std::deque<SendBufferItem>::iterator nextBufferItemToCheck = buffer.begin();
 		unsigned int packetsAwaitingAck = nextSentSeq - nextAckSeq;
 		log_debug("Updating timeout... (timestamp: " + toStr(currentTimestamp) + ")");
-		log_debug("(nextSentSeq: " + toStr(nextSentSeq) + ", nextAckSeq: " + toStr(nextAckSeq) + ")");
 		for (unsigned int i = 0; i < packetsAwaitingAck; i++) {
 			if (currentTimestamp - nextBufferItemToCheck->timestamp >= ackTimeout*MICROSECONDS_IN_A_NANOSECOND) {
 				Packet packet(nextBufferItemToCheck->data, nextBufferItemToCheck->seq);
