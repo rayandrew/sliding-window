@@ -3,6 +3,6 @@
 
 #include "common/connection.h"
 
-int send_data(Connection &conn, unsigned char *msg, unsigned int size);
+int send_data(Connection &conn, unsigned char *message, unsigned int messageSize);
 
 #endif

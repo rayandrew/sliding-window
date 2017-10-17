@@ -7,5 +7,17 @@ unsigned long timer() {
 	if (clock_gettime(CLOCK_MONOTONIC, &currentTime)) {
 		return 0;
 	}
-	return currentTime.tv_sec*1000000000 + currentTime.tv_nsec;
+	return currentTime.tv_sec*NANOSECONDS_IN_A_SECOND + currentTime.tv_nsec;
+}
+
+void log_info(std::string message) {
+	std::cout << "[ INFO ] " << message << std::endl;
+}
+
+void log_error(std::string message) {
+	std::cout << "[ ERROR ] " << message << std::endl;
+}
+
+void log_debug(std::string message) {
+	std::cout << "[ DEBUG ] " << message << std::endl;
 }

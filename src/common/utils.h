@@ -1,6 +1,23 @@
 #ifndef SW_UTILS_H
 #define SW_UTILS_H
 
+#define MICROSECONDS_IN_A_SECOND 1000000
+#define NANOSECONDS_IN_A_SECOND 1000000000
+#define MICROSECONDS_IN_A_NANOSECOND 1000
+
+#include <iostream>
+#include <sstream>
+
 unsigned long timer();
+
+void log_info(std::string message);
+void log_error(std::string message);
+void log_debug(std::string message);
+
+template <typename T> std::string toStr(const T& n) {
+    std::ostringstream stm;
+    stm << n;
+    return stm.str();
+}
 
 #endif
