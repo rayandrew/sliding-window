@@ -34,3 +34,7 @@
 # Build output
 sendfile
 recvfile
+
+# Data directory
+data/*
+!data/.gitkeep

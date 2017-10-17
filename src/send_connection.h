@@ -9,6 +9,7 @@ public:
 	SendConnection(const char *host, const char *port);
 
 	int send_data(unsigned char *message, unsigned int messageSize);
+	int sendEndOfTransmission();
 
 	void setSendWindowSize(unsigned int sendWindowSize) {
 		this->sendWindowSize = sendWindowSize;

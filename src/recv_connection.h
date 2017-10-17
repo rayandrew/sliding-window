@@ -22,6 +22,15 @@ public:
 	    return sock.isValid();
 	}
 
+	bool eot() {
+		return reachedEot;
+	}
+
+	void resetEot() {
+		checkEot = false;
+		reachedEot = false;
+	}
+
 private:
 	Socket sock;
 
@@ -30,6 +39,10 @@ private:
 
 	unsigned int nextValidatedSeq;
 	unsigned int nextRecvSeq;
+
+	bool checkEot;
+	bool reachedEot;
+	unsigned int eotSeq;
 
 	char lastReceivedAddressString[INET6_ADDRSTRLEN];
 	struct sockaddr_storage lastReceivedAddress;

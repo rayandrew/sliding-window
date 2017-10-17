@@ -19,10 +19,19 @@ Packet::Packet(unsigned char *packet) {
 }
 
 bool Packet::isValid() {
-	return this->packet[0] == SOH
+	return (this->packet[0] == SOH || this->packet[0] == EOT)
 		&& checksum(this->packet, 8) == this->packet[8]
 		&& this->packet[5] == STX
 		&& this->packet[7] == ETX;
+}
+
+void Packet::setEndOfTransmission() {
+	this->packet[0] = EOT;
+	this->packet[8] = checksum(this->packet, SIZE-1);
+}
+
+bool Packet::isEndOfTransmission() {
+	return this->packet[0] == EOT;
 }
 
 unsigned char* Packet::bytes() {
@@ -52,8 +61,17 @@ AckPacket::AckPacket(unsigned char *packet) {
 }
 
 bool AckPacket::isValid() {
-	return this->packet[0] == ACK
+	return (this->packet[0] == ACK || this->packet[0] == EOT_ACK)
 		&& checksum(this->packet, SIZE-1) == this->packet[SIZE-1];
+}
+
+void AckPacket::setEndOfTransmission() {
+	this->packet[0] = EOT_ACK;
+	this->packet[6] = checksum(this->packet, SIZE-1);
+}
+
+bool AckPacket::isEndOfTransmission() {
+	return this->packet[0] == EOT_ACK;
 }
 
 unsigned char* AckPacket::bytes() {

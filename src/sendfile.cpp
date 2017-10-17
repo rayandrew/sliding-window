@@ -5,7 +5,6 @@
 #include "send_connection.h"
 using namespace std;
 
-unsigned long long inputFileSize;
 unsigned char *fileBuffer;
 char *filename, *host, *port;
 unsigned int windowSize, bufferSize;
@@ -45,15 +44,7 @@ int main(int argc, char* argv[]) {
 	/* Open file for reading */
 	ifstream fin(filename, ifstream::binary);
 	if (fin.is_open()) {
-		inputFileSize = (unsigned long long) fin.tellg();
-		cout << "File " << filename << " opened (size: " << inputFileSize << " bytes)" << endl;
-
-		/* Send 8-byte file size first */
-		unsigned char fileSizeBytes[8];
-		for (int i = 0; i < 8; i++) {
-			fileSizeBytes[i] = (inputFileSize >> ((7-i)*8)) & 0xff;
-		}
-		conn.send_data(fileSizeBytes, 8);
+		cout << "File " << filename << " opened." << endl;
 
 		/* Read file segments and send */
 		fileBuffer = new unsigned char[bufferSize];
@@ -65,6 +56,9 @@ int main(int argc, char* argv[]) {
 		}
 		delete[] fileBuffer;
 		fin.close();
+
+		/* Send end-of-transmission packet */
+		conn.sendEndOfTransmission();
 
 	} else {
 		cerr << "Unable to open file (" << filename << ")." << endl;

@@ -15,6 +15,35 @@ SendConnection::SendConnection(const char *host, const char *port) : sock(host, 
 	nextBufferItemToSendIndex = 0;
 }
 
+int SendConnection::sendEndOfTransmission() {
+	log_info("Sending end-of-transmission packet...");
+	//sock.setRecvTimeout(ackTimeout);
+
+	/* Send EOT until an EOT_ACK reply is received */
+	log_debug("Listening for end-of-transmission reply...");
+	unsigned char ackMessage[AckPacket::SIZE];
+	while (true) {
+		Packet packet(0, newSeq);
+		packet.setEndOfTransmission();
+		if (sock.socketSend(packet.bytes(), Packet::SIZE) <= 0) {
+			log_error("Failed to send EOT (eotSeq: " + toStr(packet.getSeq()) + ")");
+		}
+
+		int recvSize = sock.socketRecv(ackMessage, AckPacket::SIZE);
+		if (recvSize > 0) {
+			AckPacket ackPacket(ackMessage);
+			if (ackPacket.isValid() && ackPacket.isEndOfTransmission() && ackPacket.getNextSeq() == newSeq) {
+				log_info("Received EOT_ACK packet (eotSeq: " + toStr(ackPacket.getNextSeq()) + ")");
+				return 1;
+			} else {
+				log_info("Rejected invalid or non-EOT_ACK packet.");
+			}
+		}
+	}
+
+	return 0;
+}
+
 int SendConnection::send_data(unsigned char *message, unsigned int messageSize) {
 	log_info("Sending message (size: " + toStr(messageSize) + " bytes)...");
 	sock.setRecvTimeout(ackTimeout);
