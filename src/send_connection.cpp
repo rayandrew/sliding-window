@@ -16,6 +16,7 @@ SendConnection::SendConnection(const char *host, const char *port) : sock(host, 
 }
 
 int SendConnection::send_data(unsigned char *message, unsigned int messageSize) {
+	log_info("Sending message (size: " + toStr(messageSize) + " bytes)...");
 	sock.setRecvTimeout(ackTimeout);
 
 	unsigned long currentTimestamp;
@@ -98,8 +99,10 @@ int SendConnection::send_data(unsigned char *message, unsigned int messageSize) 
 		}
 
 		/* Handle advertised window size == 0 case */
-		log_info("Advertised window size is 0 - set to 1 to allow periodical probes");
-		if (advBytes == 0) advBytes = 1;
+		if (advBytes == 0) {
+			advBytes = 1;
+			log_info("Advertised window size is 0 - set to 1 to allow periodical probes");
+		}
 	}
 
 	return messageBytesAcked;

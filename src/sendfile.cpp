@@ -1,20 +1,76 @@
 #include <iostream>
+#include <sstream>
+#include <fstream>
+#include <cstdlib>
 #include "send_connection.h"
 using namespace std;
 
-int main() {
+unsigned long long inputFileSize;
+unsigned char *fileBuffer;
+char *filename, *host, *port;
+unsigned int windowSize, bufferSize;
+
+void printUsageAndExit(const char *exeName) {
+	cerr << "Usage: " << exeName << " <filename> <windowsize> <buffersize> <destination_ip> <destination_port>" << endl;
+	exit(1);
+}
+
+int main(int argc, char* argv[]) {
 	
-	cout << "SENDER" << endl;
+	cout << ":: SENDER ::" << endl;
 
-	unsigned char data[1024] = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer sed elit sed massa convallis faucibus. Curabitur elementum tristique est nec auctor. Mauris suscipit sodales interdum. Donec a pellentesque eros. Donec vel ex pulvinar, auctor arcu nec, pellentesque magna. Cras porta, metus ut egestas viverra, enim ligula tincidunt arcu, at mattis nunc metus vitae erat. Curabitur rhoncus purus eu elementum malesuada. Phasellus diam orci, sollicitudin sed facilisis nec, facilisis in urna. Curabitur imperdiet ex metus, quis cursus neque vestibulum et. Fusce euismod elementum ante, vitae massa nunc.";
+	if (argc != 6) printUsageAndExit(argv[0]);
+	filename = argv[1];
 
-	SendConnection conn("localhost", "12345");
-	if (!conn.isValid()) {
-		return 1;
+	std::istringstream issWindowSize(argv[2]);
+	if (!(issWindowSize >> windowSize)) {
+		cerr << "Window size must be a number." << endl;
+		printUsageAndExit(argv[0]);
 	}
 
-	conn.send_data(data, 600);
-	cout << "Finished sending data." << endl;
+	std::istringstream issBufferSize(argv[3]);
+	if (!(issBufferSize >> bufferSize)) {
+		cerr << "Buffer size must be a number." << endl;
+		printUsageAndExit(argv[0]);
+	}
+       
+	host = argv[4];
+	port = argv[5];
 
+	/* Create a new connection */
+	SendConnection conn(host, port);
+	if (!conn.isValid()) exit(1);
+	conn.setSendWindowSize(windowSize);
+
+	/* Open file for reading */
+	ifstream fin(filename, ifstream::binary);
+	if (fin.is_open()) {
+		inputFileSize = (unsigned long long) fin.tellg();
+		cout << "File " << filename << " opened (size: " << inputFileSize << " bytes)" << endl;
+
+		/* Send 8-byte file size first */
+		unsigned char fileSizeBytes[8];
+		for (int i = 0; i < 8; i++) {
+			fileSizeBytes[i] = (inputFileSize >> ((7-i)*8)) & 0xff;
+		}
+		conn.send_data(fileSizeBytes, 8);
+
+		/* Read file segments and send */
+		fileBuffer = new unsigned char[bufferSize];
+		while (true) {
+			fin.read((char*) fileBuffer, bufferSize);
+			size_t bytesRead = fin.gcount();
+			if (!bytesRead) break;
+			conn.send_data(fileBuffer, bytesRead);
+		}
+		delete[] fileBuffer;
+		fin.close();
+
+	} else {
+		cerr << "Unable to open file (" << filename << ")." << endl;
+		exit(1);
+	}
+
+	cout << "Finished sending file (" << filename << ")." << endl;
 	return 0;
 }
