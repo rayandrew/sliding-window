@@ -5,7 +5,7 @@ LDFLAGS=-g -lm
 SENDER_MAIN=./src/sendfile.cpp
 RECEIVER_MAIN=./src/recvfile.cpp
 
-SOURCES=$(wildcard ./src/*.cpp)
+SOURCES=$(wildcard ./src/*.cpp) $(wildcard ./src/common/*.cpp)
 OBJECTS=$(SOURCES:.cpp=.o)
 SENDER_OBJECTS=$(filter-out $(RECEIVER_MAIN:.cpp=.o), $(OBJECTS))
 RECEIVER_OBJECTS=$(filter-out $(SENDER_MAIN:.cpp=.o), $(OBJECTS))
