@@ -27,7 +27,9 @@ void init_tx() {
 	advBytes = 256;
 }
 
-unsigned int send_data(int socket, unsigned char *message, unsigned int messageSize, int flags, const struct sockaddr *destAddress, socklen_t addressLength) {
+int send_data(Connection &conn, unsigned char *msg, unsigned int size) {
+	conn.setRecvTimeout(ackTimeout);
+
 	unsigned int messageBytesProcessed = 0;
 	while (messageBytesProcessed < messageSize) {
 
@@ -45,7 +47,7 @@ unsigned int send_data(int socket, unsigned char *message, unsigned int messageS
 		unsigned int bytesToSend = std::min(advBytes, newSeq - nextSentSeq);
 		for (unsigned int i = 0; i < bytesToSend; i++) {
 			Frame frame(nextBufferItemToSend->data, nextBufferItemToSend->seq);
-			sendto(socket, frame.bytes(), Frame::SIZE, flags, destAddress, addressLength); // TODO: proper networking
+			conn.send(frame.bytes(), Frame::SIZE);
 			nextBufferItemToSend->timestamp = timer();
 			nextSentSeq++;
 			nextBufferItemToSend++;
@@ -53,7 +55,7 @@ unsigned int send_data(int socket, unsigned char *message, unsigned int messageS
 
 		/* Listen for ACK */
 		unsigned char ackMessage[AckFrame::SIZE];
-		int recvSize = recvfrom(socket, ackMessage, AckFrame::SIZE, flags, destAddress, addressLength); // TODO: timer ~ frame timeout
+		int recvSize = conn.recv(ackMessage, AckFrame::SIZE);
 		if (recvSize > 0) {
 			AckFrame ackFrame(ackMessage);
 			if (ackFrame.isValid()) {
@@ -77,7 +79,7 @@ unsigned int send_data(int socket, unsigned char *message, unsigned int messageS
 		for (unsigned int i = 0; i < framesAwaitingAck; i++) {
 			if (timer() - nextBufferItemToCheck->timestamp >= ackTimeout) {
 				Frame frame(nextBufferItemToCheck->data, nextBufferItemToCheck->seq);
-				sendto(socket, frame.bytes, Frame::SIZE, flags, destAddress, addressLength);
+				conn.sendto(frame.bytes, Frame::SIZE);
 				nextBufferItemToCheck->timestamp = timer();
 			}
 			nextBufferItemToCheck++;

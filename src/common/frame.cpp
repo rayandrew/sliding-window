@@ -1,5 +1,5 @@
 #include "frame.h"
-//#include "checksum.h" TODO: implement checksum
+#include "checksum.h"
 #include <cstring>
 
 Frame::Frame(unsigned char data, unsigned int seq) {

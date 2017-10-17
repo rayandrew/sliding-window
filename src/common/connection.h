@@ -1,6 +1,8 @@
 #ifndef SW_CONNECTION_H
 #define SW_CONNECTION_H
 
+#define MICROSECONDS_IN_A_SECOND 1000000
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -10,18 +12,19 @@
 
 class Connection {
 public:
-	Connection(int);
-	Connection(int, int, int);
+	Connection(const char *host, const char *port);
+	~Connection();
 
-	void setTimeout(int, int);
+	void setRecvTimeout(unsigned long ns);
 
-	ssize_t receives(struct sockaddr_in *, char *, int *);
-
-	ssize_t sends(struct sockaddr_in *, const char *, int *);
+	int recv(char *data, unsigned int len);
+	int send(const char *data, unsigned int len);
 
 private:
 	int socket;
-	struct timeval timeout;
+	struct addrinfo hints, *servinfo, *p;
+	struct timeval recvTimeout;
+	bool isValid;
 };
 
 #endif

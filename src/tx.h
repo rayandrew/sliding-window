@@ -1,8 +1,8 @@
 #ifndef SW_TX_H
 #define SW_TX_H
 
-#include "common/network.h"
+#include "common/connection.h"
 
-unsigned int send_data(int sockfd, unsigned char *msg, unsigned int size, int flags, const struct sockaddr *dest_addr, socklen_t addrlen);
+int send_data(Connection &conn, unsigned char *msg, unsigned int size);
 
 #endif

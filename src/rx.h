@@ -1,6 +1,8 @@
 #ifndef SW_RX_H
 #define SW_RX_H
 
-void recv_data(unsigned char *msg, unsigned int *size);
+#include "common/connection.h"
+
+int recv_data(Connection &conn, unsigned char *msg, unsigned int size);
 
 #endif
