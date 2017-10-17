@@ -1,5 +1,5 @@
-#ifndef SW_CONNECTION_H
-#define SW_CONNECTION_H
+#ifndef SW_SOCKET_H
+#define SW_SOCKET_H
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -8,15 +8,15 @@
 #include <netdb.h>
 #include <unistd.h>
 
-class Connection {
+class Socket {
 public:
-	Connection(const char *host, const char *port);
-	~Connection();
+	Socket(const char *host, const char *port);
+	~Socket();
 
 	void setRecvTimeout(unsigned long ns);
 
-	int rx(unsigned char *data, unsigned int len);
-	int tx(const unsigned char *data, unsigned int len);
+	int socketRecv(unsigned char *data, unsigned int len);
+	int socketSend(const unsigned char *data, unsigned int len);
 
 	bool isValid();
 

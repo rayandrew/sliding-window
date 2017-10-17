@@ -1,19 +1,20 @@
 #include <iostream>
-#include "tx.h"
+#include "send_connection.h"
 using namespace std;
 
 int main() {
 	
-	cout << ".: SENDER :." << endl;
+	cout << "SENDER" << endl;
 
 	unsigned char data[] = "abcd";
 
-	Connection conn("127.0.0.1", "12345");
+	SendConnection conn("127.0.0.1", "12345");
 	if (!conn.isValid()) {
 		return 1;
 	}
 
-	send_data(conn, data, 4);
+	conn.send_data(data, 4);
+	cout << "Finished sending data." << endl;
 
 	return 0;
 }

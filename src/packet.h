@@ -1,10 +1,10 @@
-#ifndef SW_FRAME_H
-#define SW_FRAME_H
+#ifndef SW_PACKET_H
+#define SW_PACKET_H
 
-class Frame {
+class Packet {
 public:
-	Frame(unsigned char data, unsigned int seq);
-	Frame(unsigned char *frame);
+	Packet(unsigned char data, unsigned int seq);
+	Packet(unsigned char *packet);
 
 	bool isValid();
 	unsigned char* bytes();
@@ -17,13 +17,13 @@ private:
 	static const unsigned char SOH = 0x1;
 	static const unsigned char STX = 0x2;
 	static const unsigned char ETX = 0x3;
-	unsigned char frame[SIZE];
+	unsigned char packet[SIZE];
 };
 
-class AckFrame {
+class AckPacket {
 public:
-	AckFrame(unsigned int nextSeq, unsigned char adv);
-	AckFrame(unsigned char *frame);
+	AckPacket(unsigned int nextSeq, unsigned char adv);
+	AckPacket(unsigned char *packet);
 
 	bool isValid();
 	unsigned char* bytes();
@@ -34,7 +34,7 @@ public:
 
 private:
 	static const unsigned char ACK = 0x6;
-	unsigned char frame[SIZE];
+	unsigned char packet[SIZE];
 };
 
 #endif

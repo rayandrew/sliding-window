@@ -1,15 +1,16 @@
-#include "connection.h"
+#include "socket.h"
 #include "utils.h"
 #include <cstring>
 
-Connection::Connection(const char *host, const char *port) {
+/* Create a new socket. To create a socket that listens to all addresses, use NULL as host. */
+Socket::Socket(const char *host, const char *port) {
     memset(&this->hints, 0, sizeof(this->hints));
     this->hints.ai_family = AF_UNSPEC;
     this->hints.ai_socktype = SOCK_DGRAM;
 
     int rv;
     if ((rv = getaddrinfo(host, port, &this->hints, &this->servinfo)) != 0) {
-        log_error("Connection error: getaddrinfo: " + toStr(gai_strerror(rv)));
+        log_error("Socket error: getaddrinfo: " + toStr(gai_strerror(rv)));
         this->valid = false;
     }
 
@@ -24,24 +25,24 @@ Connection::Connection(const char *host, const char *port) {
     }
     if (this->p == NULL) {
         this->valid = false;
-        log_error("Connection error: failed to create socket");
+        log_error("Socket error: failed to create socket");
     }
 
     this->valid = true;
 }
 
-Connection::~Connection() {
+Socket::~Socket() {
     freeaddrinfo(this->servinfo);
     close(this->sockfd);
 }
 
-void Connection::setRecvTimeout(unsigned long us)
+void Socket::setRecvTimeout(unsigned long us)
 {
     this->recvTimeout.tv_sec = us / MICROSECONDS_IN_A_SECOND;
     this->recvTimeout.tv_usec = us % MICROSECONDS_IN_A_SECOND;
 }
 
-int Connection::rx(unsigned char *data, unsigned int len) {
+int Socket::socketRecv(unsigned char *data, unsigned int len) {
     fd_set fds;
     FD_ZERO(&fds);
     FD_SET(this->sockfd, &fds);
@@ -52,21 +53,21 @@ int Connection::rx(unsigned char *data, unsigned int len) {
         // timeout
         return -2;
     } else if (checkTimeout == -1) {
-        log_error("Connection error: select failed");
+        log_error("Socket error: select failed");
         return -1;
     } else {
         return recv(this->sockfd, data, len, 0);
     }
 }
 
-int Connection::tx(const unsigned char *data, unsigned int len) {
+int Socket::socketSend(const unsigned char *data, unsigned int len) {
     int numbytes;
     if ((numbytes = sendto(this->sockfd, data, len, 0, this->p->ai_addr, this->p->ai_addrlen)) == -1) {
-        log_error("Connection error: sendto failed");
+        log_error("Socket error: sendto failed");
     }
     return numbytes;
 }
 
-bool Connection::isValid() {
+bool Socket::isValid() {
     return this->valid;
 }
