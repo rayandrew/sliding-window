@@ -12,12 +12,13 @@ SendConnection::SendConnection(const char *host, const char *port) : sock(host, 
 	nextSentSeq = 0;
 	newSeq = 0;
 
-	nextBufferItemToSend = buffer.begin();
+	nextBufferItemToSendIndex = 0;
 }
 
 int SendConnection::send_data(unsigned char *message, unsigned int messageSize) {
 	sock.setRecvTimeout(ackTimeout);
 
+	unsigned long currentTimestamp;
 	unsigned int messageBytesAcked = 0;
 	unsigned int messageBytesProcessed = 0;
 	while (messageBytesAcked < messageSize) {
@@ -28,7 +29,7 @@ int SendConnection::send_data(unsigned char *message, unsigned int messageSize) 
 		for (unsigned int i = 0; i < bytesToRefill; i++) {
 			SendBufferItem sbi;
 			sbi.seq = newSeq;
-			sbi.data = message[i];
+			sbi.data = message[messageBytesProcessed + i];
 			buffer.push_back(sbi);
 			newSeq++;
 		}
@@ -37,15 +38,19 @@ int SendConnection::send_data(unsigned char *message, unsigned int messageSize) 
 		/* Send bytes as allowed by the advertised window size */
 		log_debug("Sending from seq: " + toStr(newSeq));
 		unsigned int bytesToSend = std::min(advBytes, newSeq - nextSentSeq);
+		currentTimestamp = timer();
 		for (unsigned int i = 0; i < bytesToSend; i++) {
-			Packet packet(nextBufferItemToSend->data, nextBufferItemToSend->seq);
+			SendBufferItem *nextBufferItemToSend = &buffer[nextBufferItemToSendIndex];
+			unsigned char packetData = nextBufferItemToSend->data;
+			unsigned char packetSeq = nextBufferItemToSend->seq;
+			Packet packet(packetData, packetSeq);
 			if (sock.socketSend(packet.bytes(), Packet::SIZE) <= 0) {
 				log_error("Failed to send packet (seq: " + toStr(nextBufferItemToSend->seq) + ")");
 			}
-			nextBufferItemToSend->timestamp = timer();
-			log_info("Sent packet (seq: " + toStr(nextBufferItemToSend->seq) + ", data: " + toStr(nextBufferItemToSend->data) + ", timer: " + toStr(nextBufferItemToSend->timestamp) + ")");
+			nextBufferItemToSend->timestamp = currentTimestamp;
+			log_info("Sent packet (seq: " + toStr(packet.getSeq()) + ", data: " + toStr(packet.getData()) + ", timer: " + toStr(nextBufferItemToSend->timestamp) + ")");
 			nextSentSeq++;
-			nextBufferItemToSend++;
+			nextBufferItemToSendIndex++;
 		}
 
 		/* Listen for ACK */
@@ -60,6 +65,7 @@ int SendConnection::send_data(unsigned char *message, unsigned int messageSize) 
 					nextAckSeq = ackPacket.getNextSeq();
 					while (!buffer.empty() && buffer.front().seq != nextAckSeq) {
 						buffer.pop_front();
+						nextBufferItemToSendIndex--;
 						messageBytesAcked++;
 					}
 					advBytes = (unsigned int) ackPacket.getAdv();
@@ -75,7 +81,7 @@ int SendConnection::send_data(unsigned char *message, unsigned int messageSize) 
 		// TODO: also resend if receiving duplicate ACKs for previous packet
 
 		/* Update packet timeouts, resend timeout packets */
-		unsigned long currentTimestamp = timer();
+		currentTimestamp = timer();
 		std::deque<SendBufferItem>::iterator nextBufferItemToCheck = buffer.begin();
 		unsigned int packetsAwaitingAck = nextSentSeq - nextAckSeq;
 		log_debug("Updating timeout... (timestamp: " + toStr(currentTimestamp) + ")");

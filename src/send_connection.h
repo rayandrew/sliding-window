@@ -45,7 +45,7 @@ private:
 	unsigned int newSeq;
 
 	std::deque<SendBufferItem> buffer;
-	std::deque<SendBufferItem>::iterator nextBufferItemToSend;
+	unsigned int nextBufferItemToSendIndex;
 };
 
 #endif

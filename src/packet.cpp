@@ -4,7 +4,10 @@
 
 Packet::Packet(unsigned char data, unsigned int seq) {
 	this->packet[0] = SOH;
-	memcpy(this->packet+1, &seq, sizeof(seq));
+	this->packet[1] = (seq >> 24) & 0xff;
+	this->packet[2] = (seq >> 16) & 0xff;
+	this->packet[3] = (seq >> 8) & 0xff;
+	this->packet[4] = seq & 0xff;
 	this->packet[5] = STX;
 	this->packet[6] = data;
 	this->packet[7] = ETX;
@@ -31,14 +34,15 @@ unsigned char Packet::getData() {
 }
 
 unsigned int Packet::getSeq() {
-	unsigned int seq;
-	memcpy(&seq, this->packet+1, sizeof(seq));
-	return seq;
+	return (((unsigned int) this->packet[1]) << 24) | (((unsigned int) this->packet[2]) << 16) | (((unsigned int) this->packet[3]) << 8) | ((unsigned int) this->packet[4]);
 }
 
 AckPacket::AckPacket(unsigned int nextSeq, unsigned char adv) {
 	this->packet[0] = ACK;
-	memcpy(this->packet+1, &nextSeq, sizeof(nextSeq));
+	this->packet[1] = (nextSeq >> 24) & 0xff;
+	this->packet[2] = (nextSeq >> 16) & 0xff;
+	this->packet[3] = (nextSeq >> 8) & 0xff;
+	this->packet[4] = nextSeq & 0xff;
 	this->packet[5] = adv;
 	this->packet[6] = checksum(this->packet, SIZE-1);
 }
@@ -61,7 +65,5 @@ unsigned char AckPacket::getAdv() {
 }
 
 unsigned int AckPacket::getNextSeq() {
-	unsigned int nextSeq;
-	memcpy(&nextSeq, this->packet+1, sizeof(nextSeq));
-	return nextSeq;
+	return (((unsigned int) this->packet[1]) << 24) | (((unsigned int) this->packet[2]) << 16) | (((unsigned int) this->packet[3]) << 8) | ((unsigned int) this->packet[4]);
 }

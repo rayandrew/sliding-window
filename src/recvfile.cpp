@@ -13,7 +13,9 @@ int main() {
 		return 1;
 	}
 
-	conn.recv_data(data, 4);
+	conn.setReceiveWindowSize(8);
+
+	conn.recv_data(data, 600);
 	cout << "Received data: " << data << endl;
 
 	return 0;
