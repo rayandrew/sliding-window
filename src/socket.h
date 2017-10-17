@@ -10,7 +10,7 @@
 
 class Socket {
 public:
-	Socket(const char *host, const char *port);
+	Socket(const char *host, const char *port, bool listen);
 	~Socket();
 
 	void setRecvTimeout(unsigned long ns);

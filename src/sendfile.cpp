@@ -8,7 +8,7 @@ int main() {
 
 	unsigned char data[] = "abcd";
 
-	SendConnection conn("127.0.0.1", "12345");
+	SendConnection conn("localhost", "12345");
 	if (!conn.isValid()) {
 		return 1;
 	}

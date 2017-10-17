@@ -3,7 +3,7 @@
 #include "utils.h"
 #include <algorithm>
 
-SendConnection::SendConnection(const char *host, const char *port) : sock(host, port) {
+SendConnection::SendConnection(const char *host, const char *port) : sock(host, port, false) {
 	sendWindowSize = 256;
 	advBytes = 256;
 	ackTimeout = 2 * MICROSECONDS_IN_A_SECOND;

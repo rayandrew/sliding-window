@@ -3,7 +3,7 @@
 #include "utils.h"
 #include <algorithm>
 
-RecvConnection::RecvConnection(const char *host, const char *port) : sock(host, port) {
+RecvConnection::RecvConnection(const char *host, const char *port) : sock(host, port, true) {
 	receiveWindowSize = 256;
 	recvTimeout = 2 * MICROSECONDS_IN_A_SECOND;
 

@@ -3,10 +3,15 @@
 #include <cstring>
 
 /* Create a new socket. To create a socket that listens to all addresses, use NULL as host. */
-Socket::Socket(const char *host, const char *port) {
+Socket::Socket(const char *host, const char *port, bool listen) {
     memset(&this->hints, 0, sizeof(this->hints));
     this->hints.ai_family = AF_UNSPEC;
     this->hints.ai_socktype = SOCK_DGRAM;
+    if (host == NULL) this->hints.ai_flags = AI_PASSIVE;
+
+    /* Uncomment to enable socket address reuse */
+    //int reuseAddressValue = 1;
+    //setsockopt(this->sockfd, SOL_SOCKET, SO_REUSEADDR, &reuseAddressValue, sizeof reuseAddressValue);
 
     int rv;
     if ((rv = getaddrinfo(host, port, &this->hints, &this->servinfo)) != 0) {
@@ -14,21 +19,30 @@ Socket::Socket(const char *host, const char *port) {
         this->valid = false;
     }
 
-    /* Loop through all the results and make a socket */
+    /* Loop through all the result addresses and make a socket using the first one */
     for (this->p = this->servinfo; this->p != NULL; this->p = this->p->ai_next) {
         this->sockfd = socket(this->p->ai_family, this->p->ai_socktype, this->p->ai_protocol);
         if (this->sockfd == -1) {
             this->valid = false;
             continue;
+        } else if (listen) { /* If this is a listening socket, bind to port */
+            if (bind(this->sockfd, this->p->ai_addr, this->p->ai_addrlen) == -1) {
+                close(this->sockfd);
+                this->valid = false;
+                continue;
+            }
+            log_debug("Socket: listening to " + toStr(host) + ":" + toStr(port) + "...");
         }
+
+        this->valid = true;
         break;
     }
     if (this->p == NULL) {
         this->valid = false;
+    }
+    if (!this->valid) {
         log_error("Socket error: failed to create socket");
     }
-
-    this->valid = true;
 }
 
 Socket::~Socket() {
