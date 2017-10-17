@@ -100,11 +100,18 @@ int Socket::socketSend(const unsigned char *data, unsigned int len) {
 int Socket::socketSendTo(const unsigned char *data, unsigned int len, const struct sockaddr *dest, socklen_t destAddressLength) {
     int numbytes = sendto(this->sockfd, data, len, 0, dest, destAddressLength);
     if (numbytes == -1) {
-        log_error("Socket error: socketReply: sendto failed");
+        log_error("Socket error: sendto failed");
     }
     return numbytes;
 }
 
 bool Socket::isValid() {
     return this->valid;
+}
+
+void* Socket::getInAddress(struct sockaddr *sa) {
+    if (sa->sa_family == AF_INET) {
+        return &(((struct sockaddr_in*)sa)->sin_addr);
+    }
+    return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }

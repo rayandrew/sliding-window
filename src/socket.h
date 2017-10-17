@@ -22,6 +22,8 @@ public:
 
 	bool isValid();
 
+	static void *getInAddress(struct sockaddr *sa);
+
 private:
 	int sockfd;
 	struct addrinfo hints, *servinfo, *p;

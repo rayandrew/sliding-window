@@ -9,6 +9,8 @@ RecvConnection::RecvConnection(const char *host, const char *port) : sock(host, 
 
 	nextValidatedSeq = 0;
 	nextRecvSeq = 0;
+
+	lastReceivedAddressLength = sizeof(lastReceivedAddress);
 }
 
 int RecvConnection::recv_data(unsigned char *message, unsigned int messageSize) {
@@ -26,6 +28,7 @@ int RecvConnection::recv_data(unsigned char *message, unsigned int messageSize) 
 			if (packet.isValid()) {
 				if ((packet.getSeq() - nextValidatedSeq) < receiveWindowSize) {
 					log_info("Received packet (seq: " + toStr(packet.getSeq()) + ", data: " + toStr(packet.getData()) + ")");
+					log_debug("Packet received from: " + toStr(inet_ntop(lastReceivedAddress.ss_family, Socket::getInAddress((struct sockaddr *) &lastReceivedAddress), lastReceivedAddressString, sizeof(lastReceivedAddressString))) );
 
 					/* Advance nextRecvSeq */
 					if ((packet.getSeq() - nextValidatedSeq) >= (nextRecvSeq - nextValidatedSeq)) {
