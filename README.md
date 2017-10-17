@@ -15,13 +15,13 @@ Sliding Window implementation
 
     We’ll download the code from its repository on GitHub.
 
-4. [Authors and Credits](#authors)
-
-    See men behind the project and other people that contribute to this project
-
-5. [Answers](#answers)
+4. [Answers](#answers)
 
 	Answer for questions in specification
+
+5. [Authors and Credits](#authors)
+
+    See men behind the project and other people that contribute to this project
 
 ---
 
