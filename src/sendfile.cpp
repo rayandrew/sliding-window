@@ -39,8 +39,9 @@ int main(int argc, char* argv[]) {
 	/* Create a new connection */
 	SendConnection conn(host, port);
 	if (!conn.isValid()) exit(1);
-	//conn.setSendWindowSize(windowSize);
-	conn.setAckTimeout(200000);
+	conn.setSendWindowSize(windowSize);
+	
+	conn.setAckTimeout(250000); // SCORE_OPTIMIZATIONS
 
 	/* Open file for reading */
 	ifstream fin(filename, ifstream::binary);

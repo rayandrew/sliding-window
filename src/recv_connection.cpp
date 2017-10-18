@@ -79,7 +79,7 @@ int RecvConnection::recv_data(unsigned char *message, unsigned int messageSize) 
 						}
 
 						/* Reply with ACK */
-						unsigned char adv = std::min((unsigned int) 255, receiveWindowSize - (nextRecvSeq - nextValidatedSeq));
+						unsigned char adv = compressAdv(receiveWindowSize - (nextRecvSeq - nextValidatedSeq)); //std::min((unsigned int) 255, receiveWindowSize - (nextRecvSeq - nextValidatedSeq));
 						AckPacket ackPacket(nextValidatedSeq, adv);
 						if (sock.socketSendTo(ackPacket.bytes(), AckPacket::SIZE, (struct sockaddr *) &lastReceivedAddress, lastReceivedAddressLength) <= 0) {
 							log_error("Failed to send ACK (nextSeq: " + toStr(ackPacket.getNextSeq()) + ")");

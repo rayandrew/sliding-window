@@ -102,7 +102,7 @@ int SendConnection::send_data(unsigned char *message, unsigned int messageSize) 
 						nextBufferItemToSendIndex--;
 						messageBytesAcked++;
 					}
-					advBytes = (unsigned int) ackPacket.getAdv();
+					advBytes = extractAdv(ackPacket.getAdv());
 				} else {
 					log_info("Rejected ACK outside window (nextSeq: " + toStr(ackPacket.getNextSeq()) + ")");
 					log_debug("(nextSentSeq: " + toStr(nextSentSeq) + ", nextAckSeq: " + toStr(nextAckSeq) + ")");

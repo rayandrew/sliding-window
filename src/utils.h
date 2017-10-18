@@ -14,6 +14,9 @@ void log_info(std::string message);
 void log_error(std::string message);
 void log_debug(std::string message);
 
+unsigned char compressAdv(unsigned int adv);
+unsigned int extractAdv(unsigned char input);
+
 template <typename T> std::string toStr(const T& n) {
     std::ostringstream stm;
     stm << n;
