@@ -3,6 +3,8 @@
 #include <fstream>
 #include <cstdlib>
 #include "send_connection.h"
+#include "utils.h"
+
 using namespace std;
 
 unsigned char *fileBuffer;
@@ -41,6 +43,11 @@ int main(int argc, char* argv[]) {
 	if (!conn.isValid()) exit(1);
 	//conn.setSendWindowSize(windowSize);
 	conn.setAckTimeout(200000);
+
+	/** Create file for logging */
+	std::ofstream fl;
+	fl.open("./logs/sendfile_" + toStr(timer()) + ".txt");
+	create_logger(fl, std::cout);
 
 	/* Open file for reading */
 	ifstream fin(filename, ifstream::binary);
