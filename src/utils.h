@@ -7,9 +7,11 @@
 
 #include <iostream>
 #include <sstream>
+#include <fstream>
 
 unsigned long timer();
 
+void create_logger(std::ostream& out1, std::ostream& out2);
 void log_info(std::string message);
 void log_error(std::string message);
 void log_debug(std::string message);

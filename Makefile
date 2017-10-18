@@ -1,6 +1,6 @@
 CC=g++
 CFLAGS=-c -Wall -g
-LDFLAGS=-g -lm
+LDFLAGS=-g -lm -std=c++11
 
 SENDER_MAIN=./src/sendfile.cpp
 RECEIVER_MAIN=./src/recvfile.cpp

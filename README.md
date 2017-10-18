@@ -15,11 +15,15 @@ Sliding Window implementation
 
     We’ll download the code from its repository on GitHub.
 
-4. [Answers](#answers)
+4. [How it works](#how-it-works)
+
+	How sendfile and recvfile works
+
+5. [Answers](#answers)
 
 	Answer for questions in specification
 
-5. [Authors and Credits](#authors)
+6. [Authors and Credits](#authors)
 
     See men behind the project and other people that contribute to this project
 
@@ -56,9 +60,31 @@ make
 ```
 
 ### Running
-- For Receiving File: `./recvile`
-- For Sending File: `./sendfile`
+- For Receiving File: `./recvile <filename> <windowsize> <buffersize> <port>`
+- For Sending File: `./sendfile <filename> <windowsize> <buffersize> <destination_ip> <destination_port>`
 ---
+
+### How it works
+* **Sendfile**
+	1. Ketika program sendfile dijalankan, input dari user akan diterima dan program akan membentuk suatu koneksi baru. 
+	2. Setelah itu, program akan membaca file inputan user dan memulai pengiriman file secara byte per byte. 
+	3. Program akan mengeksekusi fungsi **send_data**, yang dilakukan fungsi ini pertama kali adalah mengisi send buffer dengan data dari file.
+	4. Setelah send buffer berisi, program mengambil data dari buffer dan menambahkan header-header yang diperlukan seperti sequence number, checksum, SOH, STX, ETX, dan data.
+	5. Program akan mengirimkan byte yang diizinkan oleh kapasitas advertise window ke socket dengan ip tujuan dan port tujuan.
+	6. Program menunggu ack dari receiver yang berisi next sequence.
+	7. Setelah ack diterima akan dilakukan error-checking dengan checksum, jika tidak terjadi error, maka program akan membaca isi ack dan mengirimkan data dari buffer dengan sequence berikutnya. Jika terjadi error, maka akan ack ditolak.
+	8. Jika terjadi timeout sebelum ack diterima, maka program akan mengirim ulang packet yang belum mendapat ack.
+	9. Jika advertise window bernilai nol, maka akan diset menjadi satu untuk mengizinkan periodical probes.
+	10. Setelah semua data berhasil ditransmisikan, akan dikirimkan sebuah paket yang menandakan akhir dari transmisi.
+
+
+* **Recvfile**
+	1. Ketika program recvfile dijalankan, akan dibuat koneksi baru dari inputan user.
+	2. Program akan mengeksekusi fungsi **recv_data** yang menunggu transmisi dari semua alamat.
+	3. Ketika packet diterima, dilakukan pengecekan apakah packet EOT. Jika iya, maka program telah selesai dan jika tidak, maka program akan melanjutkan pembacaan.
+	4. Packet yang diterima akan disimpan dalam buffer receiver.
+	5. Program akan mengirimkan ack ke pengirim yang memiliki sequence number berikutnya dari packet yang dikirim.
+	6. Program mengambil data dari buffer receiver dan menghapus buffer tersebut serta menuliskan data tersebut ke dalam file.
 
 ### Answers
 1. Jika advertised window yang dikirim bernilai 0, maka menunjukkan bahwa buffer receiver telah penuh.
@@ -140,5 +166,8 @@ Raw table
 ## Authors
 
 * **Jonathan Christopher [13515001]** - [nathanchrs](https://github.com/nathanchrs)
+	- Packet, Send_connection, sendfile, socket
 * **Winarto [13515061]** - [yowinarto](https://github.com/yowinarto)
+	- AckPacket, Recv_connection, Checksum, Utils
 * **Ray Andrew [13515073]** - [rayandrews](https://github.com/rayandrews)
+	- AckPakcet, Recv_connection, Logger, recvfile
