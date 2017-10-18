@@ -23,9 +23,9 @@ void log_debug(std::string message) {
 }
 
 unsigned char compressAdv(unsigned int adv) {
-	return std::min((unsigned int) 255, adv/8);
+	return std::min((unsigned int) 255, adv);
 }
 
 unsigned int extractAdv(unsigned char input) {
-	return ((unsigned int) input) * 8;
+	return ((unsigned int) input);
 }
