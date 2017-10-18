@@ -3,6 +3,8 @@
 #include <fstream>
 #include <cstdlib>
 #include "recv_connection.h"
+#include "utils.h"
+
 using namespace std;
 
 char *filename, *port;
@@ -34,6 +36,11 @@ int main(int argc, char* argv[]) {
 	}
        
 	port = argv[4];
+
+	/** Create file for logging */
+	std::ofstream fl;
+	fl.open("./logs/recvfile_" + toStr(timer()) + ".txt");
+	create_logger(fl, std::cout);
 
 	/* Open file for writing */
 	ofstream fout(filename, ifstream::binary);
