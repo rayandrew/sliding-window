@@ -166,5 +166,8 @@ Raw table
 ## Authors
 
 * **Jonathan Christopher [13515001]** - [nathanchrs](https://github.com/nathanchrs)
+	- Packet, Send_connection, sendfile, socket
 * **Winarto [13515061]** - [yowinarto](https://github.com/yowinarto)
+	- AckPacket, Recv_connection, Checksum, Utils
 * **Ray Andrew [13515073]** - [rayandrews](https://github.com/rayandrews)
+	- AckPakcet, Recv_connection, Logger, recvfile
