@@ -46,7 +46,8 @@ int main(int argc, char* argv[]) {
 
 	/** Create file for logging */
 	std::ofstream fl;
-	fl.open("./logs/sendfile_" + toStr(timer()) + ".txt");
+	string logfile = "./logs/sendfile_" + toStr(timer()) + ".txt";
+	fl.open(logfile.c_str());
 	create_logger(fl, std::cout);
 
 	/* Open file for reading */
@@ -74,5 +75,8 @@ int main(int argc, char* argv[]) {
 	}
 
 	cout << "Finished sending file (" << filename << ")." << endl;
+
+	/** close logfile **/
+	fl.close();
 	return 0;
 }
